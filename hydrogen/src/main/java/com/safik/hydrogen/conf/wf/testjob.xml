@@ -1,0 +1,17 @@
+<workflow-app xmlns='uri:oozie:workflow:0.1' name='hydrides-domain-file-copy'>
+	<start to='hydrides-file-copy' />
+	<action name="#1">
+         <fs>
+            <mkdir path='/user/hydrogen/target/${wf:id()}'/>
+            <move source='/user/hydrogen/source/' target='/user/hydrogen/target/${wf:id()}/'/>
+            <!-- chmod path='${jobOutput}' permissions='-rwxrw-rw-' dir-files='true'/ -->>
+        </fs>
+        <ok to="end"/>
+        <error to="fail"/>
+    </action>
+    <kill name="fail">
+		<message>Java failed, error
+			message[${wf:errorMessage(wf:lastErrorNode())}]</message>
+	</kill>
+	<end name='end' />
+</workflow-app>

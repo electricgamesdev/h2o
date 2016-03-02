@@ -1,0 +1,15 @@
+<coordinator-app name="coordinator1" frequency="${frequency}"
+	start="${startTime}" end="${endTime}" timezone="UTC"
+	xmlns="uri:oozie:coordinator:0.1">
+	<datasets>
+	#1
+	</datasets>
+	<input-events>
+	#2
+	</input-events>
+	<action>
+		<workflow>
+			<app-path>${workflowPath}</app-path>
+		</workflow>
+	</action>
+</coordinator-app>		

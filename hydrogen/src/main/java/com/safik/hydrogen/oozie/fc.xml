@@ -1,0 +1,15 @@
+<workflow-app xmlns="uri:oozie:workflow:0.2" name="hydrides#1">
+	<start to="mv#1" />
+	<action name="mv#1">
+         <fs>
+             <mkdir path="${nameNode}/user/hydrogen/target/${wf:id()}"/>
+           #2
+        </fs>
+        <ok to="end"/>
+        <error to="fail"/>
+    </action>
+    <kill name="fail">
+		<message>File move failed, error message[${wf:errorMessage(wf:lastErrorNode())}]</message>
+	</kill>
+	<end name="end" />
+</workflow-app>
