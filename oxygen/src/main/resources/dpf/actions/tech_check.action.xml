@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action>
+   <event on="regex_failure" type="warn">
+      <rule desc="datatype" type="hive">
+        insert into file_errors 
+        select total_count,error from
+      		( select * from act_crd where unique_id='${workflowId}' )
+      </rule>
+   </event>
+   <event on="columncount_failure" type="error">
+      <rule type="hive">
+        insert into file_errors 
+        select total_count,error from
+      		( select * from act_crd where unique_id='${workflowId}' )
+      </rule>
+   </event>
+</action>

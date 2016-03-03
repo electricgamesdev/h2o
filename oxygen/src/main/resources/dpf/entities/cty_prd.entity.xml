@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity type="lookup">
+	<field id="cty" type="string" size="2">
+		<value code="cn">cn</value>
+		<value code="in">in</value>
+		<value code="kr">kr</value>
+	</field>
+	<field id="prd" type="string" size="3">
+		<value code="crd">crd</value>
+		<value code="pcl">pcl</value>
+		<value code="mtg">mtg</value>
+	</field>
+</entity>

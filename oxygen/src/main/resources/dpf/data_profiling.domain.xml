@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<domain>
+	<init>
+		<source-watcher>
+			<source id="card_ingestion" source-dir="/opt/hydrogen/source" error-dir="/opt/hydrogen/error"
+				dest-dir="/user/hydrogen/processed" work-flow="dpf_check"
+				file-group-pattern="name.substring(file.lastIndexOf('_'),file.lastIndexOf('.'))">
+				<entity path="entities/ctl" required="true"/>
+				<entity path="entities/act_crd" required="true" />
+			</source>
+			<source id="pcl_ingestion" source-dir="/opt/hydrogen/source"
+				dest-dir="/user/hydrogen/source" work-flow="dpf_check"
+				file-group-pattern="file.substring(file.lastIndexOf('_'),file.lastIndexOf('.'))">
+				<entity path="entities/ctl" required="true" />
+				<entity path="entities/act_pcl" required="true" />
+			</source>
+		</source-watcher>
+
+	</init>
+
+	<actions>
+		<work-flow id="dpf_check">
+			<action path="actions/tech_check" >
+				<entity path="entities/file_errors" />
+			</action>
+			<action path="actions/biz_check" >
+				<entity path="entities/attr_errors" />
+			</action>
+			<action path="actions/outlier_check" >
+				<entity path="entities/attr_errors" />
+			</action>
+			<action path="actions/aggr_check" >
+				<entity path="entities/aggr_opt" />
+			</action>
+		</work-flow>
+	</actions>
+</domain>

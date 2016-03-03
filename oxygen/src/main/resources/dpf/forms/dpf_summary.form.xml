@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form type="json" page-size="50">
+	<input>
+		<param field="cty"/>
+		<param field="prd"/>
+		<param field="lob"/>
+	</input>
+	<output>
+		{
+		
+		}
+	</output>
+</form>

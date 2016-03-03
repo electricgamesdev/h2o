@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action>
+	<event on="no-warn" type="info">
+		<rule id="check_sum_check" type="hive">
+			insert into file_errors
+			(${filed.id},${record.header,record.data}])
+		</rule>
+		<rule id="record_count_check" type="hive">
+			insert into file_errors
+			(${filed.id},${record.header,record.data}])
+		</rule>
+	</event>
+</action>

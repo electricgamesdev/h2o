@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity type="table" >
+	<field id="cty" type="partition" />
+	<field id="prd" type="partition" />
+	<field id="unique_id" type="partition" />
+	<field id="repoting_period" type="partition" />
+	<field id="header" type="string" length="5" order="2" nullable="false"/>
+	<field id="event" type="string" order="3" nullable="false"/>
+	<field id="status" type="string" order="4" nullable="false"/>
+</entity>

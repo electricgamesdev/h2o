@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action>
+	<event on="update" type="info">
+		<rule desc="check_sum_check" type="hive">
+			insert into file_errors
+			(${filed.id},${record.header,record.data}])
+		</rule>
+	</event>
+</action>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout>
+	<init>
+		<flow-watcher>
+			<data-set id="dpf-summary-report" work-flow="build-summary-report">
+				<entity path="entities/ctl"/>
+			</data-set>
+			<data-set id="aggr-summary-report" work-flow="build-aggr-report">
+				<entity path="entities/aggr_opt"/>
+			</data-set>
+		</flow-watcher>
+	</init>
+	<actions>
+		<work-flow id="build-summary-report">
+			<action path="actions/update_dpf_summary">
+				<form path="forms/dpf_summary" />
+			</action>
+			<action path="actions/update_issue_summary">
+				<form path="forms/dpf_issue_summary" />
+			</action>
+		</work-flow>
+		<work-flow id="build-aggr-report">
+			<action path="actions/update_dpf_summary">
+				<form path="forms/dpf_summary" />
+			</action>
+			<action path="actions/update_issue_summary">
+				<form path="forms/dpf_issue_summary" />
+			</action>
+		</work-flow>
+	</actions>
+</layout>

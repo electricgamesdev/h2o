@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action>
+	<event on="form" >
+		<rule  type="hive">
+			select * from ctl
+			where cty='${cty}' and prd='${prd}' and lob='${lob}'
+		</rule>
+	</event>
+</action>
