@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<hydride>
-  
+<hydride description="Test Hydride">
+	<domains>
+		<domain path="data_profiling"/>
+	</domains>
+	<layouts>
+		<layout path="data_profiling"/>  
+	</layouts>
+	<configs>
+		<config path="config/flume.properties"/>
+	</configs>	
 </hydride>
