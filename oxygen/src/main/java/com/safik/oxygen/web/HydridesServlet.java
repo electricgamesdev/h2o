@@ -1,6 +1,9 @@
 package com.safik.oxygen.web;
 
+import java.io.File;
+import java.net.URI;
 import java.net.URL;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -19,31 +22,57 @@ public class HydridesServlet extends HttpServlet {
 			logger.debug("Initializing servlet '" + getServletName() + "'");
 		}
 
-		String input =	getServletConfig().getInitParameter("hydrides");
-	
+		String input = getServletConfig().getInitParameter("hydrides");
+
 		URL url = getServletConfig().getServletContext().getClassLoader().getResource(input);
-		
-		if(url!=null){
+
+		if (url != null) {
 			try {
-				HydrideContext context = new HydrideContext(url);
+
+				// stage 1 : Loading hydrides - initial check
+				Map<String, Map> hydrides = HydridesFactory.getInstance(Hydride.class, url).getData();
+				System.out.println("printing hydride:" + printKeyValue("hydrides",hydrides));
+
+				Map domains = hydrides.get("domains");
+				Map layouts = hydrides.get("layouts");
+				Map technology = hydrides.get("technology");
+
+				// stage 2 : Loading layouts and domains -
+				// technology/environment/infrastructure check
+				url = new File((String) ((Map) domains.get("data_profiling")).get("path")).toURI().toURL();
+				Map<String, Map> d1 = HydridesFactory.getInstance(Domain.class, url).getData();
+				System.out.println("printing domain:" + printKeyValue("domain",d1));
+
+				url = new File((String) ((Map) layouts.get("data_profiling")).get("path")).toURI().toURL();
+				Map<String, Map> l1 = HydridesFactory.getInstance(Layout.class, url).getData();
+				System.out.println("printing layout:" + printKeyValue("layout",l1));
+
+				// stage 3 : Loading fundamental comps - implementation check
+
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-		try {
-			if (input != null)
-				logger.info("file " + url.getFile());
-			System.out.println("path--- "+url.getPath());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	//	logger.info("url " + url);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Servlet '" + getServletName() + "' configured successfully");
 		}
+	}
+
+	private StringBuilder printKeyValue(String elem,Map d1) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("\n");
+	
+		for (Object k : d1.keySet()) {
+			Object v = d1.get(k);
+			if (v instanceof String) {
+				sb.append(elem+"["+k+"="+ v + "]\n");
+			} else {
+				sb.append(printKeyValue(elem+":"+k.toString(),(Map) v));
+			}
+		}
+		return sb;
 	}
 
 	/**

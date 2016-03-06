@@ -2,9 +2,11 @@
 <hydride description="Test Hydride">
 	<domains>
 		<domain path="data_profiling"/>
+		<domain path="data_profiling2"/>	
 	</domains>
 	<layouts>
-		<layout path="data_profiling"/>  
+		<layout path="data_profiling"/>
+		<layout path="data_profiling2"/>  
 	</layouts>
 	<configs>
 		<config path="config/flume.properties"/>
