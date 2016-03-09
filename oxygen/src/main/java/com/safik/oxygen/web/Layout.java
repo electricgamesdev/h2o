@@ -15,6 +15,7 @@ public class Layout extends AbsractHydridesFactory {
 	protected void process(Map<String, Map> map,XMLStreamReader reader) throws Exception{
 		Map tempMap = null;
 		Map filterMap = null;
+		Map frmMap = null;
 		while (reader.hasNext()) {
 			switch (reader.next()) {
 			case XMLStreamConstants.START_ELEMENT:
@@ -36,11 +37,11 @@ public class Layout extends AbsractHydridesFactory {
 					break;
 				}
 				if ("forms".equals(reader.getLocalName())) {
-					tempMap = createChild(tempMap,reader);
+					frmMap = createChild(tempMap,reader);
 					break;
 				}
 				if ("form".equals(reader.getLocalName())) {
-					tempMap = parseAttr(tempMap, reader);
+					tempMap = parseAttr(frmMap, reader);
 					break;
 				}
 				if ("action".equals(reader.getLocalName())) {

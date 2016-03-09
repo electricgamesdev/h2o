@@ -12,7 +12,10 @@ import javax.servlet.http.HttpServlet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class HydridesServlet extends HttpServlet {
+import com.safik.hydrogen.engine.HydrideConnector;
+import com.safik.hydrogen.engine.HydrideContext;
+
+public class HydridesServlet extends HttpServlet implements HydrideConnector {
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -24,30 +27,28 @@ public class HydridesServlet extends HttpServlet {
 
 		String input = getServletConfig().getInitParameter("hydrides");
 
-		URL url = getServletConfig().getServletContext().getClassLoader().getResource(input);
+		URL url = getServletConfig().getServletContext().getClassLoader()
+				.getResource(input);
 
 		if (url != null) {
 			try {
 
 				// stage 1 : Loading hydrides - initial check
-				Map<String, Map> hydrides = HydridesFactory.getInstance(Hydride.class, url).getData();
-				System.out.println("printing hydride:" + printKeyValue("hydrides",hydrides));
+				Map<String, Map> hydrides = HydridesFactory.getInstance(
+						Hydride.class, url).getData();
+				System.out.println("printing hydride:"
+						+ printKeyValue("hydrides", hydrides));
 
-				Map domains = hydrides.get("domains");
-				Map layouts = hydrides.get("layouts");
-				Map technology = hydrides.get("technology");
-
-				// stage 2 : Loading layouts and domains -
-				// technology/environment/infrastructure check
-				url = new File((String) ((Map) domains.get("data_profiling")).get("path")).toURI().toURL();
-				Map<String, Map> d1 = HydridesFactory.getInstance(Domain.class, url).getData();
-				System.out.println("printing domain:" + printKeyValue("domain",d1));
-
-				url = new File((String) ((Map) layouts.get("data_profiling")).get("path")).toURI().toURL();
-				Map<String, Map> l1 = HydridesFactory.getInstance(Layout.class, url).getData();
-				System.out.println("printing layout:" + printKeyValue("layout",l1));
-
+				
+				
 				// stage 3 : Loading fundamental comps - implementation check
+				HydrideContext context = new HydrideContext(hydrides, this);
+				
+				System.out.println(printKeyValue("domain", context.getDomain("data_profiling")));
+				System.out.println(printKeyValue("layout", context.getLayout("data_profiling")));
+				
+				System.out.println(printKeyValue("form", context.getDomain("data_profiling")));
+				System.out.println(printKeyValue("layout", context.getLayout("data_profiling")));
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -56,20 +57,21 @@ public class HydridesServlet extends HttpServlet {
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Servlet '" + getServletName() + "' configured successfully");
+			logger.debug("Servlet '" + getServletName()
+					+ "' configured successfully");
 		}
 	}
 
-	private StringBuilder printKeyValue(String elem,Map d1) {
+	private StringBuilder printKeyValue(String elem, Map d1) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n");
-	
+
 		for (Object k : d1.keySet()) {
 			Object v = d1.get(k);
 			if (v instanceof String) {
-				sb.append(elem+"["+k+"="+ v + "]\n");
+				sb.append(elem + "[" + k + "=" + v + "]\n");
 			} else {
-				sb.append(printKeyValue(elem+":"+k.toString(),(Map) v));
+				sb.append(printKeyValue(elem + ":" + k.toString(), (Map) v));
 			}
 		}
 		return sb;
@@ -83,7 +85,8 @@ public class HydridesServlet extends HttpServlet {
 	 */
 	@Override
 	public final String getServletName() {
-		return (getServletConfig() != null ? getServletConfig().getServletName() : null);
+		return (getServletConfig() != null ? getServletConfig()
+				.getServletName() : null);
 	}
 
 	/**
@@ -94,7 +97,24 @@ public class HydridesServlet extends HttpServlet {
 	 */
 	@Override
 	public final ServletContext getServletContext() {
-		return (getServletConfig() != null ? getServletConfig().getServletContext() : null);
+		return (getServletConfig() != null ? getServletConfig()
+				.getServletContext() : null);
+	}
+
+	@Override
+	public Map getData(URL url) throws Exception {
+		Map<String, Map> map = null;
+		if (url.toString().endsWith(".domain.xml")) {
+			map = HydridesFactory.getInstance(Domain.class, url).getData();
+			System.out.println("printing domain:"
+					+ printKeyValue("domain", map));
+		} else if (url.toString().endsWith(".layout.xml")) {
+			map = HydridesFactory.getInstance(Layout.class, url).getData();
+			System.out.println("printing layout:"
+					+ printKeyValue("layout", map));
+		}
+
+		return map;
 	}
 
 }
