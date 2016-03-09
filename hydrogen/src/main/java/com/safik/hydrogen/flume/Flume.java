@@ -1,9 +1,6 @@
 package com.safik.hydrogen.flume;
 
 
-import org.apache.flume.api.RpcClient;
-import org.apache.flume.api.RpcClientFactory;
-
 import com.safik.hydrogen.engine.Hydride;
 import com.safik.hydrogen.engine.HydrideContext;
 import com.safik.hydrogen.engine.ScriptFactory;
