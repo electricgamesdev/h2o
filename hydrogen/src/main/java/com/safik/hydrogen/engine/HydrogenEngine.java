@@ -1,30 +1,33 @@
 package com.safik.hydrogen.engine;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class HydrideEngine {
+public class HydrogenEngine {
 	
-	private static HydrideEngine engine=null;
+	private static HydrogenEngine engine=null;
 	
 	private Map<String,Hydride> hydrides = new TreeMap<String,Hydride>();
-	
-	private HydrideEngine(){
-		
+	private HydrideConnector connector = null;
+	private HydrogenEngine(HydrideConnector connector){
+		this.connector=connector;
 	}
 	
-	public static HydrideEngine getInstance(String name,Map<String, Map> hydrides,HydrideConnector connector){
+	public static HydrogenEngine getInstance(HydrideConnector connector){
 		
 		if(engine==null){
-			engine = new HydrideEngine();
+			engine = new HydrogenEngine(connector);
 		}
 		
+		
+		
+		return engine;
+	}
+	
+	public void addHydrides(String name,Map hydrides){
 		HydrideContext context =new HydrideContext(hydrides, connector);
 		Hydride hydride=new Hydride(context);
 		engine.add(name,hydride);
-		
-		return engine;
 	}
 
 	private void add(String name, Hydride hydride) {
@@ -36,6 +39,14 @@ public class HydrideEngine {
 			Hydride h = hydrides.get(key);
 			h.start();
 		}
+	}
+
+	public void initHydrides() {
+		for (String key  : hydrides.keySet()) {
+			Hydride h = hydrides.get(key);
+			h.inialize();
+		}
+		
 	}
 
 }
