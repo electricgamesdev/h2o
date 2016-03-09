@@ -1,7 +1,5 @@
 package com.safik.oxygen.web;
 
-import java.io.File;
-import java.net.URI;
 import java.net.URL;
 import java.util.Map;
 
@@ -14,10 +12,12 @@ import org.apache.commons.logging.LogFactory;
 
 import com.safik.hydrogen.engine.HydrideConnector;
 import com.safik.hydrogen.engine.HydrideContext;
+import com.safik.hydrogen.engine.HydrogenEngine;
 
 public class HydridesServlet extends HttpServlet implements HydrideConnector {
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
+	private HydrogenEngine hydrogenEngine = null;
 
 	@Override
 	public final void init() throws ServletException {
@@ -25,6 +25,7 @@ public class HydridesServlet extends HttpServlet implements HydrideConnector {
 			logger.debug("Initializing servlet '" + getServletName() + "'");
 		}
 
+		hydrogenEngine =	 HydrogenEngine.getInstance(this);
 		String input = getServletConfig().getInitParameter("hydrides");
 
 		URL url = getServletConfig().getServletContext().getClassLoader()
@@ -33,23 +34,12 @@ public class HydridesServlet extends HttpServlet implements HydrideConnector {
 		if (url != null) {
 			try {
 
-				// stage 1 : Loading hydrides - initial check
+				// stage 1 : Loading hydrides 
 				Map<String, Map> hydrides = HydridesFactory.getInstance(
 						Hydride.class, url).getData();
-				System.out.println("printing hydride:"
-						+ printKeyValue("hydrides", hydrides));
-
 				
-				
-				// stage 3 : Loading fundamental comps - implementation check
-				HydrideContext context = new HydrideContext(hydrides, this);
-				
-				System.out.println(printKeyValue("domain", context.getDomain("data_profiling")));
-				System.out.println(printKeyValue("layout", context.getLayout("data_profiling")));
-				
-				System.out.println(printKeyValue("form", context.getDomain("data_profiling")));
-				System.out.println(printKeyValue("layout", context.getLayout("data_profiling")));
-
+				hydrogenEngine.addHydrides("test", hydrides);
+				hydrogenEngine.initHydrides();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -60,6 +50,22 @@ public class HydridesServlet extends HttpServlet implements HydrideConnector {
 			logger.debug("Servlet '" + getServletName()
 					+ "' configured successfully");
 		}
+	}
+	
+	private void test(Map<String, Map> hydrides){
+		System.out.println("printing hydride:"
+				+ printKeyValue("hydrides", hydrides));
+
+		
+		
+		// stage 3 : Loading fundamental comps - implementation check
+		HydrideContext context = new HydrideContext(hydrides, this);
+		
+		System.out.println(printKeyValue("domain", context.getDomain("data_profiling")));
+		System.out.println(printKeyValue("layout", context.getLayout("data_profiling")));
+		
+		System.out.println(printKeyValue("form", context.getDomain("data_profiling")));
+		System.out.println(printKeyValue("layout", context.getLayout("data_profiling")));
 	}
 
 	private StringBuilder printKeyValue(String elem, Map d1) {
