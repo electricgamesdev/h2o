@@ -24,8 +24,8 @@ public class HydrogenEngine {
 		return engine;
 	}
 	
-	public void addHydrides(String name,Map hydrides){
-		HydrideContext context =new HydrideContext(hydrides, connector);
+	public void addHydrides(String name,Map hydrides,Map<String,String> pMap){
+		HydrideContext context =new HydrideContext(hydrides, connector,pMap);
 		Hydride hydride=new Hydride(context);
 		engine.add(name,hydride);
 	}
@@ -45,6 +45,14 @@ public class HydrogenEngine {
 		for (String key  : hydrides.keySet()) {
 			Hydride h = hydrides.get(key);
 			h.inialize();
+		}
+		
+	}
+
+	public void shutdown() {
+		for (String key  : hydrides.keySet()) {
+			Hydride h = hydrides.get(key);
+			h.shutdown();
 		}
 		
 	}

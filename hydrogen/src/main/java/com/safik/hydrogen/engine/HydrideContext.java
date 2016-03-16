@@ -10,9 +10,10 @@ public class HydrideContext {
 	private Map hydrides = null;
 	private HydrideConnector connector;
 
-	public HydrideContext(Map hydrides, HydrideConnector connector) {
+	public HydrideContext(Map hydrides, HydrideConnector connector, Map<String, String> pMap) {
 		this.hydrides = hydrides;
 		this.connector = connector;
+		this.pMap=pMap;
 	}
 
 	public Map getDomains() {
@@ -145,6 +146,19 @@ public class HydrideContext {
 	public Map getLayoutDimensionFormAction(String layout,String dim,String form,String action) {
 		Map d = getLayoutDimensionFormActions(layout,dim,form);
 		return loadPath((Map)d.get(action));
+	}
+
+	public String getValue(Map m, String string) {
+		if(m.get(string)!=null)
+			return (String)m.get(string);
+		
+		return "";
+	}
+
+	private Map<String,String> pMap = new HashMap<String, String>();
+	public String getValue(String string) {
+		System.out.println("HydrideContext GET:"+string+"="+pMap.get(string));
+		return pMap.get(string);
 	}
 	
 

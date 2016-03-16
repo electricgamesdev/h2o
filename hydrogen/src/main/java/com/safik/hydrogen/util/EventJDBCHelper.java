@@ -177,6 +177,26 @@ public class EventJDBCHelper {
 		}
 		return null;
 	}
+
+	public static ResultSet getCoordinatorJob() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public static ResultSet getWorkflowJob() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public static void updateCoordinatorJob(ResultSet cset) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public static void updateWorkflowJob(ResultSet wset) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	
 }

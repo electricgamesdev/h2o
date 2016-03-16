@@ -1,6 +1,6 @@
 <dataset name="#1" frequency="${datasetfrequency}"
 	initial-instance="${datasetinitialinstance}" timezone="${datasettimezone}">
 	<uri-template>${dataseturitemplate}</uri-template>
-	<done-flag>#2</done-flag>
+	<done-flag>${#2}</done-flag>
 </dataset>
 	

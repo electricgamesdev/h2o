@@ -1,6 +1,7 @@
 package com.safik.hydrogen.flume;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,23 +10,18 @@ import org.apache.commons.lang.StringUtils;
 
 import com.safik.hydrogen.engine.Hydride;
 import com.safik.hydrogen.engine.HydrideContext;
+import com.safik.hydrogen.engine.Runner;
 import com.safik.hydrogen.engine.Script;
 import com.safik.hydrogen.engine.ScriptRunner;
 import com.safik.hydrogen.ex.ScriptException;
 
 public class Flume extends Script {
 
-	String template = null;
+	public Runner createRunner() throws ScriptException {
 
-	public Flume() {
+		ScriptRunner r = new ScriptRunner(Flume.class);
 
-		try {
-			ScriptRunner script = ScriptRunner.getInstance(this.getClass());
-			script.start();
-		} catch (ScriptException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		return r;
 	}
 
 	public static void main(String[] args) {
@@ -36,33 +32,65 @@ public class Flume extends Script {
 
 	}
 
-	@Override
-	public void init() throws Exception {
-		List<String> l = IOUtils.readLines(this.getClass().getResourceAsStream("flume_dynamic.properties"));
-		StringBuilder builder = new StringBuilder();
-		for (String string : l) {
-			builder.append(string);
+	private String template = null;
+
+	public Flume() {
+		List<String> l = null;
+		try {
+			l = IOUtils.readLines(this.getClass().getResourceAsStream(
+					"flume_dynamic.properties"));
+			template = new String();
+			for (String string : l) {
+				template = template + string + "\n";
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
-		template = builder.toString();
 	}
 
 	@Override
-	public String create(HydrideContext context) {
-
+	public String initialize(HydrideContext context) {
 		String domain = "data_profiling";
+
 		Map map = context.getDomainSources(domain);
 		for (Object k : map.keySet()) {
-			String name = (String) k;
+
+			String source = (String) k;
 			String conf = template.toString();
-			StringUtils.replace(conf, "${agent}", name);
-			Map m = context.getDomainSource(domain, name);
-			StringUtils.replace(conf, "${source-dir}", (String)m.get("source-dir"));
-			StringUtils.replace(conf, "${hdfs-dir}", (String)m.get("hdfs-dir"));
-			StringUtils.replace(conf, "${hdfs-error-dir}", (String)m.get("hdfs-error-dir"));
+			String entities = "";
+			String patterns = "";
+			Map emap = context.getDomainSourceEntities(domain, source);
+			for (Object e : emap.keySet()) {
+				String entity = (String) e;
+				String id = entity.substring(entity.lastIndexOf("/") + 1);
+				conf = conf + "agent.sources.source1.selector.mapping." + id+ " = channel1 \n";
+				entities=entities+id+",";
+				
+				Map entMap = context.getDomainSourceEntity(domain, source, entity);
+				if(entMap!=null){
+					patterns=patterns+entMap.get("pattern")+",";
+					System.out.println("pattern = "+patterns);
+				}
+			}
+			conf=conf+"agent.sources.source1.interceptors.i2.entities = "+entities+" \n";
+			conf=conf+"agent.sources.source1.interceptors.i2.patterns = "+patterns+" \n";
+			conf=conf.replaceAll("agent", source);
+			Map m = context.getDomainSource(domain, source);
+			conf=conf.replaceAll("source-dir",context.getValue(m,"source-dir"));
+			conf=conf.replaceAll("hdfs-dir", context.getValue(m,"hdfs-dir"));
+			conf=conf.replaceAll("hdfs-error-dir",context.getValue(m,"hdfs-error-dir"));
+
+			Map<String,String> c=new HashMap<String, String>();
+			c.put("scriptToExecute", source+".flume");
+			c.put("source", source);
+			
+			addScript(source+".flume", conf,c);
+
 		}
 
-		return null;
+		return "success";
 	}
 
 }
