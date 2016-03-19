@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <entity type="file" pattern="ord_[crd]_[act].dat" column-separator="|" header-index="0">
 	<field id="cty" type="partition" source="filename" regex="[a-z3]" nullable="false">
-		<entity path="entities/cty_prd" field="cty" />
+		<entity path="cty_prd" field="cty" />
 	</field>
 	<field id="prd" type="partition" source="filename" regex="[a-z3]" nullable="false">
-		<entity path="entities/cty_prd" field="prd" />
+		<entity path="cty_prd" field="prd" />
 	</field>
 	<field id="unique_id" type="partition" source="filename" regex="[0-9]" nullable="false"/>
 	<field id="repoting_period" type="partition" regex="yyyymm" order="1" nullable="false"/>

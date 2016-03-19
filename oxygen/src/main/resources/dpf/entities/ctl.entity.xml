@@ -2,10 +2,10 @@
 <!-- ord_in_crd_gcb_all_20150331_201312031234.ctl -->
 <entity type="file" pattern="ord_[a-z]2_[a-z]3_[a-z]5-\d[0-9]8-\d[0-9]10.ctl" separator="|" header="true">
 	<field id="cty" type="partition" get-value="file.split('_')[1]" check-pattern="[a-z3]" check-null="false">
-		<entity path="entities/cty_prd" field="cty" />
+		<entity path="cty_prd" field="cty" />
 	</field>
 	<field id="prd" type="partition" get-value="file.split('_')[1]" check-pattern="[a-z3]" check-null="false">
-		<entity path="entities/cty_prd" field="prd" />
+		<entity path="cty_prd" field="prd" />
 	</field>
 	<field id="unique_id" type="partition" get-value="workflowId" check-pattern="[a-z3]" check-null="false"/>
 	<field id="repoting_period"  get-value="file.split('_')[5].substring(0,6)" check-pattern="[a-z3]" check-null="false"/>

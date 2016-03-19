@@ -27,31 +27,30 @@ public class HydridesServlet extends HttpServlet implements HydrideConnector {
 			logger.debug("Initializing servlet '" + getServletName() + "'");
 		}
 
-		//CopyOfOozie o=new CopyOfOozie();
-		//o.main(null);
-		
-		hydrogenEngine =	 HydrogenEngine.getInstance(this);
+		// CopyOfOozie o=new CopyOfOozie();
+		// o.main(null);
+
+		hydrogenEngine = HydrogenEngine.getInstance(this);
 		String input = getServletConfig().getInitParameter("hydrides");
 
-		URL url = getServletConfig().getServletContext().getClassLoader()
-				.getResource(input);
+		URL url = getServletConfig().getServletContext().getClassLoader().getResource(input);
 
 		if (url != null) {
 			try {
 
-				Map<String,String> pMap = new HashMap<String,String>();
+				Map<String, String> pMap = new HashMap<String, String>();
 				String str = getServletConfig().getServletContext().getContextPath();
 				String strw = getServletConfig().getServletContext().getRealPath("core-site.xml");
-				
+
 				pMap.put("core-site.xml", getServletConfig().getServletContext().getRealPath("WEB-INF/core-site.xml").toString());
 				pMap.put("hdfs-site.xml", getServletConfig().getServletContext().getRealPath("WEB-INF/hdfs-site.xml").toString());
 				pMap.put("mapred-site.xml", getServletConfig().getServletContext().getRealPath("WEB-INF/mapred-site.xml").toString());
 				pMap.put("yarn-site.xml", getServletConfig().getServletContext().getRealPath("WEB-INF/yarn-site.xml").toString());
-				
-				// stage 1 : Loading hydrides 
+
+				// stage 1 : Loading hydrides
 				Map<String, Map> hydrides = HydridesFactory.getInstance(Hydride.class, url).getData();
-				
-				hydrogenEngine.addHydrides("test", hydrides,pMap);
+
+				hydrogenEngine.addHydrides("test", hydrides, pMap);
 				hydrogenEngine.initHydrides();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -60,34 +59,27 @@ public class HydridesServlet extends HttpServlet implements HydrideConnector {
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Servlet '" + getServletName()
-					+ "' configured successfully");
+			logger.debug("Servlet '" + getServletName() + "' configured successfully");
 		}
 	}
-	
-	
+
 	@Override
 	public void destroy() {
-		
-		
+
 		if (logger.isDebugEnabled()) {
-			logger.debug("Servlet '" + getServletName()
-					+ "' configured successfully");
+			logger.debug("Servlet '" + getServletName() + "' configured successfully");
 		}
 	}
-	
-	private void test(Map<String, Map> hydrides){
-		System.out.println("printing hydride:"
-				+ printKeyValue("hydrides", hydrides));
 
-		
-		
+	private void test(Map<String, Map> hydrides) {
+		System.out.println("printing hydride:" + printKeyValue("hydrides", hydrides));
+
 		// stage 3 : Loading fundamental comps - implementation check
-		HydrideContext context = new HydrideContext(hydrides, this,null);
-		
+		HydrideContext context = new HydrideContext(hydrides, this, null);
+
 		System.out.println(printKeyValue("domain", context.getDomain("data_profiling")));
 		System.out.println(printKeyValue("layout", context.getLayout("data_profiling")));
-		
+
 		System.out.println(printKeyValue("form", context.getDomain("data_profiling")));
 		System.out.println(printKeyValue("layout", context.getLayout("data_profiling")));
 	}
@@ -115,8 +107,7 @@ public class HydridesServlet extends HttpServlet implements HydrideConnector {
 	 */
 	@Override
 	public final String getServletName() {
-		return (getServletConfig() != null ? getServletConfig()
-				.getServletName() : null);
+		return (getServletConfig() != null ? getServletConfig().getServletName() : null);
 	}
 
 	/**
@@ -127,8 +118,7 @@ public class HydridesServlet extends HttpServlet implements HydrideConnector {
 	 */
 	@Override
 	public final ServletContext getServletContext() {
-		return (getServletConfig() != null ? getServletConfig()
-				.getServletContext() : null);
+		return (getServletConfig() != null ? getServletConfig().getServletContext() : null);
 	}
 
 	@Override
@@ -136,17 +126,20 @@ public class HydridesServlet extends HttpServlet implements HydrideConnector {
 		Map<String, Map> map = null;
 		if (url.toString().endsWith(".domain.xml")) {
 			map = HydridesFactory.getInstance(Domain.class, url).getData();
-			System.out.println("printing domain:"
-					+ printKeyValue("domain", map));
 		} else if (url.toString().endsWith(".layout.xml")) {
 			map = HydridesFactory.getInstance(Layout.class, url).getData();
-			System.out.println("printing layout:"
-					+ printKeyValue("layout", map));
+		} else if (url.toString().endsWith(".entity.xml")) {
+			map = HydridesFactory.getInstance(Entity.class, url).getData();
+			System.out.println(printKeyValue("entity", map));
+		} else if (url.toString().endsWith(".form.xml")) {
+			map = HydridesFactory.getInstance(Form.class, url).getData();
+			System.out.println(printKeyValue("form", map));
+		} else if (url.toString().endsWith(".action.xml")) {
+			map = HydridesFactory.getInstance(Action.class, url).getData();
+			System.out.println(printKeyValue("action", map));
 		}
 
 		return map;
 	}
-	
-	
 
 }

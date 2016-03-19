@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <domain>
 	<source-watcher>
-		<source id="card_ingestion" source-dir="/opt/hydrogen/source" hdfs-error-dir="/opt/hydrogen/error"		
+		<source id="card_ingestion" source-dir="/opt/hydrogen/card_data" hdfs-error-dir="/user/hydrogen/error"		
 			workflow="dpf_check"
 			hdfs-dir="/user/hydrogen/processed"  dataset-filter="name.substring(file.lastIndexOf('_'),file.lastIndexOf('.'))">
 			<entity path="entities/ctl" required="true"/>
 			<entity path="entities/act_crd" required="true" />
 		</source>
-		<source id="pcl_ingestion" source-dir="/opt/hydrogen/source" error-dir="/opt/hydrogen/error"
+		<source id="pcl_ingestion" source-dir="/opt/hydrogen/pcl_data" hdfs-error-dir="/user/hydrogen/error"
 			workflow="dpf_check2"
 			hdfs-dir="/user/hydrogen/processed"   dataset-filter="name.substring(file.lastIndexOf('_'),file.lastIndexOf('.'))">
 			<entity path="entities/ctl" required="true"/>
