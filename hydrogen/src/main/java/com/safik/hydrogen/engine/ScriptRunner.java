@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -32,9 +33,10 @@ public final class ScriptRunner implements Runner {
 
 			params.load(type.getResourceAsStream("params"));
 
-			pid = EventJDBCHelper.getProcess(type.getSimpleName());
-			if (pid != null) {
+			List<Long> pidlist = EventJDBCHelper.getProcess(type.getSimpleName());
+			for (Long p:pidlist) {
 				System.out.println("killing already running process:" + pid);
+				pid=p.toString();
 				kill();
 			}
 

@@ -7,32 +7,32 @@
 	<name>Hydrogen</name>
 	<description>Hydrogen Framework</description>
 	<dependencies>
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.apache.hbase</groupId> -->
-<!-- 			<artifactId>hbase</artifactId> -->
-<!-- 			<version>0.94.19</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.apache.thrift</groupId> -->
-<!-- 			<artifactId>libthrift</artifactId> -->
-<!-- 			<version>0.9.3</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.apache.flume</groupId> -->
-<!-- 			<artifactId>flume-ng-sdk</artifactId> -->
-<!-- 			<version>1.6.0</version> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.apache.hbase</groupId> -->
+		<!-- <artifactId>hbase</artifactId> -->
+		<!-- <version>0.94.19</version> -->
+		<!-- </dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.apache.thrift</groupId> -->
+		<!-- <artifactId>libthrift</artifactId> -->
+		<!-- <version>0.9.3</version> -->
+		<!-- </dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.apache.flume</groupId> -->
+		<!-- <artifactId>flume-ng-sdk</artifactId> -->
+		<!-- <version>1.6.0</version> -->
+		<!-- </dependency> -->
 		<dependency>
 			<groupId>org.apache.flume</groupId>
 			<artifactId>flume-ng-core</artifactId>
 			<version>1.6.0</version>
 		</dependency>
 
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.apache.hbase</groupId> -->
-<!-- 			<artifactId>hbase-client</artifactId> -->
-<!-- 			<version>1.1.2</version> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.apache.hbase</groupId> -->
+		<!-- <artifactId>hbase-client</artifactId> -->
+		<!-- <version>1.1.2</version> -->
+		<!-- </dependency> -->
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-client</artifactId>
@@ -63,11 +63,11 @@
 			<artifactId>avro-mapred</artifactId>
 			<version>1.7.7</version>
 		</dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.apache.hadoop</groupId> -->
-<!-- 			<artifactId>hadoop-core</artifactId> -->
-<!-- 			<version>1.1.0</version> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.apache.hadoop</groupId> -->
+		<!-- <artifactId>hadoop-core</artifactId> -->
+		<!-- <version>1.1.0</version> -->
+		<!-- </dependency> -->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
@@ -87,6 +87,11 @@
 			<groupId>org.apache.crunch</groupId>
 			<artifactId>crunch-core</artifactId>
 			<version>0.12.0-hadoop2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.persistence</groupId>
+			<artifactId>eclipselink</artifactId>
+			<version>2.6.2</version>
 		</dependency>
 	</dependencies>
 </project>

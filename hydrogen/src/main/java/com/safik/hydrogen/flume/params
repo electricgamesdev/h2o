@@ -1,4 +1,4 @@
 -n=source
 -c=conf
 -f=scriptToExecute
--C=/home/cloudera/git/hydrogen/hydrogen/target/hydrogen-0.0.1.jar:/home/cloudera/.m2/repository/mysql/mysql-connector-java/5.1.26/mysql-connector-java-5.1.26.jar:/home/cloudera/.m2/repository/org/springframework/spring-expression/4.2.4.RELEASE/spring-expression-4.2.4.RELEASE.jar:/home/cloudera/.m2/repository/org/springframework/spring-core/4.2.4.RELEASE/spring-core-4.2.4.RELEASE.jar
+-C=/home/cloudera/git/hydrogen/hydrogen/target/hydrogen-0.0.1.jar:/home/cloudera/.m2/repository/mysql/mysql-connector-java/5.1.26/mysql-connector-java-5.1.26.jar:/home/cloudera/.m2/repository/org/springframework/spring-expression/4.2.4.RELEASE/spring-expression-4.2.4.RELEASE.jar:/home/cloudera/.m2/repository/org/springframework/spring-core/4.2.4.RELEASE/spring-core-4.2.4.RELEASE.jar:/home/cloudera/.m2/repository/org/eclipse/persistence/eclipselink/2.6.2/eclipselink-2.6.2.jar

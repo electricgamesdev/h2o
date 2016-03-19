@@ -118,7 +118,7 @@ public class Oozie extends Script implements Runner {
 					ie.append(StringUtils.replace(i, "#2", id));
 
 					fs.append(StringUtils.replace(i, "#1", id));
-
+					mv = StringUtils.replace(i, "#1", id );
 				}
 
 				Properties srcProp = new Properties();
@@ -140,11 +140,14 @@ public class Oozie extends Script implements Runner {
 				co = IOUtils.toString(Oozie.class.getResourceAsStream("co.xml"));
 				co = StringUtils.replace(co, "#1", ds.toString());
 				co = StringUtils.replace(co, "#2", ie.toString());
+				co = StringUtils.replace(co, "coordinator1", source+"_coordinator");
 				System.out.println("co=" + co);
 				fc = IOUtils.toString(Oozie.class.getResourceAsStream("fc.xml"));
 				fc = StringUtils.replace(fc, "#1", "dpf");
-				fc = StringUtils.replace(fc, "#2", fs.toString());
-
+				fc = StringUtils.replace(fc, "#2",mv);
+				fc = StringUtils.replace(fc, "hydridesdpf",source+"_workflow");
+				fc = StringUtils.replace(fc, "mvdpf",source+"_move");
+				
 				addScript(source + "_coordinator.xml", co, null);
 				addScript(source + "_workflow.xml", fc, null);
 				

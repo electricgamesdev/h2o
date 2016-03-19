@@ -68,7 +68,7 @@ public class Hydride extends Thread {
 
 			
 			oozie.start();
-			//flume.start();
+			flume.start();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -151,7 +151,13 @@ public class HydrideContext {
 	public String getValue(Map m, String string) {
 		if(m.get(string)!=null)
 			return (String)m.get(string);
-		
+		else{
+			if(m.get("attr")!=null){
+				Map m2=(Map)m.get("attr");
+				if(m2.get(string)!=null)
+					return (String)m2.get(string);
+			}
+		}
 		return "";
 	}
 

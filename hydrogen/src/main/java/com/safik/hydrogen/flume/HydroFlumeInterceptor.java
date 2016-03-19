@@ -19,7 +19,9 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import com.safik.hydrogen.db.DBHelper;
 import com.safik.hydrogen.engine.Entity;
+import com.safik.hydrogen.model.Source_Master;
 import com.safik.hydrogen.oozie.Oozie;
 import com.safik.hydrogen.util.EventJDBCHelper;
 
@@ -30,11 +32,15 @@ public class HydroFlumeInterceptor implements Interceptor {
 	private String entities = null;
 	private String patterns = null;
 
+
+	
 	public HydroFlumeInterceptor(Context context) {
 		source = context.getString("source");
 		regex = context.getString("filter");
 		entities = context.getString("entities");
 		patterns = context.getString("patterns");
+		
+		
 	}
 
 	public void close() {
@@ -197,9 +203,25 @@ public class HydroFlumeInterceptor implements Interceptor {
 	public static class Builder implements Interceptor.Builder {
 
 		private Context context;
-
+		Source_Master master = null;
 		public void configure(Context context) {
 			this.context = context;
+			String source = context.getString("source");
+			String regex = context.getString("filter");
+			String entities = context.getString("entities");
+			String patterns = context.getString("patterns");
+			
+			master = (Source_Master) DBHelper.findByKey(Source_Master.class, source);
+			if(master==null){
+				master = new Source_Master();
+				master.setSource_id(source);
+				master.setDataset_filter(regex);
+				master.setSource_entities(entities);
+				master.setSource_patterns(patterns);
+				master.setCreated_date(DBHelper.ts());
+				master.setUpdated_date(DBHelper.ts());
+				DBHelper.persist(master);
+			}
 		}
 
 		public Interceptor build() {
