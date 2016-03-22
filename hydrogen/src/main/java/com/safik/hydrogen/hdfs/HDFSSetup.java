@@ -13,10 +13,10 @@ import com.safik.hydrogen.engine.Hydride;
 import com.safik.hydrogen.engine.HydrideContext;
 import com.safik.hydrogen.flume.Flume;
 
-public class HDFSSetup extends Hydride {
+public class HDFSSetup  {
 
 	public HDFSSetup(HydrideContext context) {
-		super(context);
+		super();
 	}
 
 	public void run() {
@@ -58,7 +58,7 @@ public class HDFSSetup extends Hydride {
 	
 	public static void main(String[] args) {
 		HDFSSetup hdfs=new HDFSSetup(null);
-		hdfs.start();
+		//hdfs.start();
 	}
 
 }

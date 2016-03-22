@@ -12,7 +12,9 @@ import java.util.Properties;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
+import com.safik.hydrogen.db.DBHelper;
 import com.safik.hydrogen.ex.ScriptException;
+import com.safik.hydrogen.model.Os_Process;
 import com.safik.hydrogen.util.EventJDBCHelper;
 import com.safik.hydrogen.util.UnixShellThread;
 
@@ -23,6 +25,21 @@ public final class ScriptRunner implements Runner {
 
 	Class type = null;
 	String pid = null;
+	
+	public static void initialize(){
+		
+		List<Os_Process> pidlist = DBHelper.findByCriteria(Os_Process.class, new HashMap<String, Object>());
+		for (Os_Process p:pidlist) {
+			System.out.println("killing already running process:" + p.getPid());
+			Runtime rt = Runtime.getRuntime();
+			try {
+				Process process = rt.exec("kill -15 " + p.getPid());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
 
 	public ScriptRunner(Class type) throws ScriptException {
 		this.type = type;
@@ -32,13 +49,6 @@ public final class ScriptRunner implements Runner {
 			params = new Properties();
 
 			params.load(type.getResourceAsStream("params"));
-
-			List<Long> pidlist = EventJDBCHelper.getProcess(type.getSimpleName());
-			for (Long p:pidlist) {
-				System.out.println("killing already running process:" + pid);
-				pid=p.toString();
-				kill();
-			}
 
 		} catch (Exception e) {
 			throw new ScriptException(e);
@@ -62,8 +72,17 @@ public final class ScriptRunner implements Runner {
 			f.setAccessible(true);
 			pid = "" + f.getInt(process);
 			System.out.println("Process id: " + pid);
-			EventJDBCHelper.insertProcess(type.getSimpleName(),
-					Long.parseLong(pid), "RUNNING");
+			
+			Os_Process os=new Os_Process();
+			os.setPid(Long.valueOf(pid));
+			os.setStage(Stages.FLUME.name());
+			os.setStatus(Status.RUNNING.name());
+			//os.setName(script);
+			//os.setCommand(script);
+			os.setModel(Models.SOURCE.name());
+			os.setStart_time(DBHelper.ts());
+			DBHelper.persist(os);
+			
 			UnixShellThread errorGobbler = new UnixShellThread(
 					process.getErrorStream(), type.getSimpleName() + ":" + pid);
 			errorGobbler.start();

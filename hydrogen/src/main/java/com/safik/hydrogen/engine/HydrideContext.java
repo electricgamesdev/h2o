@@ -166,6 +166,18 @@ public class HydrideContext {
 		System.out.println("HydrideContext GET:"+string+"="+pMap.get(string));
 		return pMap.get(string);
 	}
-	
 
+	public String getIdInPath(String path) {
+		return path.substring(path.lastIndexOf("/") + 1);
+	}
+
+	private Map<GV,Object> gvMap = new HashMap<GV, Object>();
+	public void setGV(GV key, Object obj) {
+		gvMap.put(key, obj);
+	}
+	
+	public Object getGV(GV key){
+		return gvMap.get(key);
+	}
+	
 }

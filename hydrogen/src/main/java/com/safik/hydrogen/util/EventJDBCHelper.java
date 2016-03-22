@@ -7,11 +7,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.safik.hydrogen.db.DBHelper;
 import com.safik.hydrogen.engine.Entity;
+import com.safik.hydrogen.engine.Stages;
+import com.safik.hydrogen.engine.Status;
+import com.safik.hydrogen.model.Entity_Detail;
+import com.safik.hydrogen.model.Source_Detail;
+import com.safik.hydrogen.model.Source_Master;
+import com.safik.hydrogen.model.Task_Detail;
 
 public class EventJDBCHelper {
 
@@ -68,66 +78,29 @@ public class EventJDBCHelper {
 
 	}
 
-	public static List<Entity> isAllEntityAsEvent(String pk, List<Entity> elist) {
+	public static List<Source_Detail> isAllEntityAsEvent(String pk, Source_Master master) {
 
-		try {
-
-			Connection dbCon = DriverManager.getConnection(dbURL, username, password);
-			PreparedStatement stmt = dbCon.prepareStatement("select * from h2o where groupkey=? and status=?");
-			stmt.setString(1, pk);
-			stmt.setString(2, "INIT");
-			insertEvent("kjknkj", 6666L, "stttt", "TRACK", "hghg", pk);
-
-			ResultSet rs = stmt.executeQuery();
-			insertEvent("kjknkj", 7777L, "stttt:" + elist.size(), "TRACK", "hghg:" + rs.getFetchSize(), pk);
-			int i = 0;
-			while (rs.next()) {
-				insertEvent("kjknkj", 7711L, "stttt:" + elist.size(), "TRACK", "hghg:" + rs.getFetchSize(), pk);
-				for (Entity entity : elist) {
-					insertEvent("kjknkj", 7722L, "stttt:" + elist.size(), "TRACK", "hghg:" + rs.getFetchSize(), pk);
-					Pattern pattern = Pattern.compile(entity.getPattern());
-					Matcher matcher = pattern.matcher(rs.getString("basename"));
-					String s = rs.getString("basename") + "." + rs.getString("processId") + ".processing";
-					if (matcher.matches()) {
-						i++;
-						entity.setOk(true);
-						entity.setName(s);
-						insertEvent(s, 8888L, "matching", "TRACK", "hghg", pk);
-						break;
-					} else {
-						insertEvent(s, 9999L, "not matching", "TRACK", rs.getString("groupkey"), pk);
-					}
-
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("dataset_filter_value", pk);
+		map.put("status", Status.INIT);
+		List<Source_Detail> details = DBHelper.findByCriteria(Source_Detail.class, map);
+		List<Source_Detail> finals = new ArrayList<Source_Detail>();
+		int i = 0;
+		for (Entity_Detail entity : master.getEntity_Details()) {
+			for (Source_Detail detail : details) {
+				Pattern pattern = Pattern.compile(entity.getPattern());
+				Matcher matcher = pattern.matcher(detail.getSource_header());
+				String s = detail.getSource_header() + "." + detail.getFlume_unique_id() + ".processing";
+				if (matcher.matches()) {
+					i++;
+					detail.setFlume_header(s);
+					finals.add(detail);
+					break;
 				}
-			}
-
-			if (elist.size() == i) {
-				insertEvent("ggggggg", 9911L, "count match", "TRACK", pk, pk);
-				boolean allOk = true;
-				for (Entity entity : elist) {
-					if (!entity.isOk()) {
-						allOk = false;
-						break;
-					}
-				}
-
-				if (allOk) {
-					PreparedStatement stmt1 = dbCon.prepareStatement("update h2o set status=? where groupkey=?");
-					stmt1.setString(1, "COMP");
-					stmt1.setString(2, pk);
-					stmt1.execute();
-					return elist;
-				}
-
-			} else {
-
-				insertEvent("ggggggg", 9922L, "count not match", "TRACK", pk, pk);
 
 			}
-
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if (master.getEntity_Details().size() == finals.size())
+				return finals;
 		}
 
 		return null;
@@ -163,24 +136,26 @@ public class EventJDBCHelper {
 		return plist;
 	}
 
-	public static ResultSet getCoordinatorJob() {
-		// TODO Auto-generated method stub
-		return null;
+	public static List<Task_Detail> getCoordinatorJob() {
+		Map<String,Object> map= new HashMap<String, Object>();
+		map.put("stage", Stages.COORDINATOR.name());
+		map.put("status", Status.RUNNING.name());
+		List<Task_Detail> list= DBHelper.findByCriteria(Task_Detail.class, map);
+		return list;
 	}
 
-	public static ResultSet getWorkflowJob() {
-		// TODO Auto-generated method stub
-		return null;
+	public static  List<Task_Detail>  getWorkflowJob() {
+		Map<String,Object> map= new HashMap<String, Object>();
+		map.put("stage", Stages.WORKFLOW.name());
+		map.put("status", Status.RUNNING.name());
+		List<Task_Detail> list= DBHelper.findByCriteria(Task_Detail.class, map);
+		return list;
 	}
 
-	public static void updateCoordinatorJob(ResultSet cset) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public static void updateWorkflowJob(ResultSet wset) {
-		// TODO Auto-generated method stub
-
+	public static void updateOozieTask(Task_Detail td,String status) {
+		td.setEvent_status(status);
+		td.setUpdated_time(DBHelper.ts());
+		DBHelper.merge(td);
 	}
 
 }

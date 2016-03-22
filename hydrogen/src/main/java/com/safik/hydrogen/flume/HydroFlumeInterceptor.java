@@ -1,7 +1,10 @@
 package com.safik.hydrogen.flume;
 
+import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +13,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.interceptor.Interceptor;
@@ -21,26 +26,28 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import com.safik.hydrogen.db.DBHelper;
 import com.safik.hydrogen.engine.Entity;
+import com.safik.hydrogen.engine.Stages;
+import com.safik.hydrogen.engine.Status;
+import com.safik.hydrogen.engine.Tasks;
+import com.safik.hydrogen.model.Entity_Detail;
+import com.safik.hydrogen.model.Source_Detail;
 import com.safik.hydrogen.model.Source_Master;
+import com.safik.hydrogen.model.Task_Detail;
 import com.safik.hydrogen.oozie.Oozie;
 import com.safik.hydrogen.util.EventJDBCHelper;
 
 public class HydroFlumeInterceptor implements Interceptor {
 
-	private String source = null;
-	private String regex = null;
-	private String entities = null;
-	private String patterns = null;
+	Log log = LogFactory.getLog(HydroFlumeInterceptor.class);
 
-
+	private Source_Master master = null;
+	private String home = null;
+	private Set<Entity_Detail> entitylist = null;
 	
-	public HydroFlumeInterceptor(Context context) {
-		source = context.getString("source");
-		regex = context.getString("filter");
-		entities = context.getString("entities");
-		patterns = context.getString("patterns");
-		
-		
+	public HydroFlumeInterceptor(Context context, Source_Master master,Set<Entity_Detail> entitylist) {
+		home = System.getProperty("user.home");
+		this.entitylist=entitylist;
+		this.master = master;
 	}
 
 	public void close() {
@@ -48,37 +55,17 @@ public class HydroFlumeInterceptor implements Interceptor {
 
 	}
 
-	List<Entity> elist = null;
-	Expression exp = null;
+	private Expression exp = null;
+	
 
 	public void initialize() {
-		elist = loadSource(source);
-		ExpressionParser parser = new SpelExpressionParser();
-		exp = parser.parseExpression(regex);
-	}
-
-	/**
-	 * Dynamically load from hydrgen application
-	 * 
-	 * @param source
-	 * @return
-	 */
-	private List<Entity> loadSource(String source) {
-
-		List<Entity> elist = new ArrayList<Entity>();
-
-		String ent_array[] = entities.split(",");
-		String pat_array[] = patterns.split(",");
-
-		for (int i = 0; i < ent_array.length; i++) {
-			Entity e1 = new Entity();
-			e1.setId(ent_array[i]);
-			e1.setHeader(true);
-			e1.setPattern(pat_array[i]);
-			e1.setSeperator("|");
-			elist.add(e1);
+		log.info("Init----- " + master.getSource_id() + " entities " + master.getEntity_Details());
+		
+		for (Entity_Detail entity : entitylist) {
+			log.info("Init----- " + entity.getEntity_id() + " entity pattern = " + entity.getPattern());
 		}
-		return elist;
+		ExpressionParser parser = new SpelExpressionParser();
+		exp = parser.parseExpression(master.getDataset_filter());
 	}
 
 	public Event intercept(Event event) {
@@ -87,14 +74,10 @@ public class HydroFlumeInterceptor implements Interceptor {
 
 		events.add(event);
 
-		events = intercept(events);
+		List<Source_Detail> evlist = process(events);
+		checkToTriggerOozie(evlist);
 
-		if (events.size() > 0) {
-			checkToTriggerOozie();
-			return events.get(0);
-		}
-
-		return null;
+		return event;
 
 	}
 
@@ -102,23 +85,27 @@ public class HydroFlumeInterceptor implements Interceptor {
 
 	public List<Event> intercept(List<Event> events) {
 
-		List<Event> evlist = process(elist, events);
-		checkToTriggerOozie();
-		return evlist;
+		List<Source_Detail> evlist = process(events);
+		checkToTriggerOozie(evlist);
+		return events;
 	}
 
-	private void checkToTriggerOozie() {
+	private void checkToTriggerOozie(List<Source_Detail> evlist) {
+		String jobId = null;
 		for (String pk : keylist) {
-			if (EventJDBCHelper.isAllEntityAsEvent(pk, elist) != null) {
+			
+			List<Source_Detail> edlist = EventJDBCHelper.isAllEntityAsEvent(pk, master);
+			if (edlist != null) {
 				try {
+					log.info("Ooziee configuration : "+edlist);
 					Properties p = new Properties();
-					p.load(new FileReader("hydrogen/"+source+".properties"));
-					List<Entity> edlist = EventJDBCHelper.isAllEntityAsEvent(pk, elist);
-					for (Entity entity : edlist) {
-						p.setProperty(entity.getId(), entity.getName());
+					p.load(new FileReader(home + File.separator + "hydrogen" + File.separator + master.getSource_id() + ".properties"));
+					for (Source_Detail entity : edlist) {
+						p.setProperty(entity.getEntity_id(), entity.getFlume_header());
 					}
 					OozieClient wc = new OozieClient(p.getProperty("oozie.url"));
 
+					log.info("Ooziee configuration : "+p);
 					// create a workflow job configuration and set the workflow
 					// application path
 					Properties conf = wc.createConfiguration();
@@ -127,105 +114,146 @@ public class HydroFlumeInterceptor implements Interceptor {
 					}
 
 					// submit and start the workflow job
-					String jobId = wc.run(conf);
+					jobId = wc.run(conf);
 
-					System.out.println("Workflow job submitted");
+					for (Source_Detail detail : edlist) {
+						detail.setStage(Stages.COORDINATOR.name());
+						detail.setStatus(Status.RUNNING.name());
+						Task_Detail t = new Task_Detail();
+						t.setEvent_name(Tasks.DATASET_SCAN.name());
+						t.setEvent_description(jobId);
+						t.setStart_time(DBHelper.ts());
+						t.setCreated_time(DBHelper.ts());
+						t.setUpdated_time(DBHelper.ts());
+						t.setEvent_status(Status.RUNNING.name());
+						t.setSource_Detail(detail);
+						detail.setTask_Details(Arrays.asList(t));
 
-					EventJDBCHelper
-							.insertEvent("oozie", 9999L,
-									"workflow job submitted", "OOZIE-SUBMIT",
-									jobId, pk);
+						DBHelper.merge(detail);
+					}
+
 				} catch (Exception e) {
+					for (Source_Detail detail : edlist) {
+						detail.setStage(Stages.COORDINATOR.name());
+						detail.setStatus(Status.ERROR.name());
+						Task_Detail t = new Task_Detail();
+						t.setEvent_name(Tasks.DATASET_SCAN.name());
+						t.setStart_time(DBHelper.ts());
+						t.setCreated_time(DBHelper.ts());
+						t.setUpdated_time(DBHelper.ts());
+						t.setEvent_status(Status.ERROR.name());
+						t.setEvent_description(e.getMessage());
+						t.setSource_Detail(detail);
+						detail.setTask_Details(Arrays.asList(t));
 
+						DBHelper.merge(detail);
+					}
+
+					e.printStackTrace();
 				}
 			}
 		}
 	}
 
-	private synchronized List<Event> process(List<Entity> elist,
-			List<Event> events) {
+	private synchronized List<Source_Detail> process(List<Event> events) {
 		String primary_key = null;
-		List<Event> evlist = new ArrayList<Event>();
+		List<Source_Detail> evlist = new ArrayList<Source_Detail>();
+		for (Event event : events) {
 
-		for (Entity entity : elist) {
-			for (Event event : events) {
+			Map<String, String> map = event.getHeaders();
+			String filename = map.get("basename");
+			String eventId = map.get("timestamp");
 
-				Map<String, String> map = event.getHeaders();
-				String filename = map.get("basename");
-				String eventId = map.get("timestamp");
+			log.info("Init----- event header : " + map);
+			log.info("Init----- content : " + event.getBody());
+			log.info("Init----- entitylist : " + entitylist);
 
-				if (entity.getEventId() != null
-						&& entity.getEventId().equalsIgnoreCase(eventId)) {
-					event.getHeaders().put("entity",
-							entity.getId().toLowerCase());
-					continue;
-				}
+			Source_Detail detail = new Source_Detail();
+			detail.setFlume_unique_id(eventId);
+			detail.setSource_header(filename);
+			detail.setStage(master.getEntity_Details().size() + "");// Stages.FLUME.name());
+			detail.setStatus(Status.INVALID.name());
+			detail.setSource_Master(master);
+			for (Entity_Detail entity : entitylist) {
 
-				entity.setEventId(eventId);
-				entity.setName(filename);
+				detail.setEntity_id(entity.getEntity_id());
+
+				/*
+				 * if (evlist.contains(detail)) {
+				 * event.getHeaders().put("entity",
+				 * entity.getEntity_id().toLowerCase());
+				 * log.info("Init----- event header : "+map); continue; }
+				 */
+
 				try {
 
 					Pattern pattern = Pattern.compile(entity.getPattern());
 					Matcher matcher = pattern.matcher(filename);
 
+					log.info("Init----- header check : " + entity.getPattern() + " --> " + filename);
+
 					if (matcher.matches()) {
-						StandardEvaluationContext fileContext = new StandardEvaluationContext(
-								entity);
+						StandardEvaluationContext fileContext = new StandardEvaluationContext(detail);
 						primary_key = exp.getValue(fileContext, String.class);
 						keylist.add(primary_key);
+						event.getHeaders().put("entity", entity.getEntity_id().toLowerCase());
 
-						event.getHeaders().put("entity",
-								entity.getId().toLowerCase());
+						log.info("Init----- header matched : " + primary_key);
 
-						EventJDBCHelper.insertEvent(filename,
-								Long.parseLong(eventId),
-								new String(event.getBody()), "INIT", source,
-								primary_key);
+						detail.setEntity_pattern(entity.getPattern());
+						detail.setDataset_filter_value(primary_key);
+						detail.setStage(Stages.FLUME.name());
+						detail.setStatus(Status.INIT.name());
 
+						Task_Detail t = new Task_Detail();
+						t.setEvent_name(Tasks.ENTITY_PATTERN_MATCH.name());
+						t.setStart_time(DBHelper.ts());
+						t.setEnd_time(DBHelper.ts());
+						t.setCreated_time(DBHelper.ts());
+						t.setUpdated_time(DBHelper.ts());
+						t.setEvent_status(Status.SUCCESS.name());
+						t.setSource_Detail(detail);
+						detail.setTask_Details(Arrays.asList(t));
+						DBHelper.persist(detail);
 					}
 
 				} catch (Exception e) {
-					EventJDBCHelper.insertEvent(
-							filename,
-							Long.parseLong(eventId),
-							"Pattern does not matching with "
-									+ entity.getPattern() + " Java Error:"
-									+ e.getMessage(), "FAIL", source,
-							primary_key);
+					e.printStackTrace();
+					detail.setSource_header(e.getMessage());
+					detail.setStatus(Status.ERROR.name());
+					DBHelper.persist(detail);
 
 				}
 			}
+
+			//DBHelper.persist(detail);
+
 		}
 
-		return events;
+		return evlist;
 	}
 
 	public static class Builder implements Interceptor.Builder {
 
 		private Context context;
-		Source_Master master = null;
+		private Source_Master master = null;
+		private Set<Entity_Detail> entitylist = null;
+		
 		public void configure(Context context) {
 			this.context = context;
 			String source = context.getString("source");
-			String regex = context.getString("filter");
-			String entities = context.getString("entities");
-			String patterns = context.getString("patterns");
-			
+			entitylist = new HashSet<Entity_Detail>();
 			master = (Source_Master) DBHelper.findByKey(Source_Master.class, source);
-			if(master==null){
-				master = new Source_Master();
-				master.setSource_id(source);
-				master.setDataset_filter(regex);
-				master.setSource_entities(entities);
-				master.setSource_patterns(patterns);
-				master.setCreated_date(DBHelper.ts());
-				master.setUpdated_date(DBHelper.ts());
-				DBHelper.persist(master);
+			for (Entity_Detail entity : master.getEntity_Details()) {
+				System.out.println("id="+entity.getEntity_id());
+				entitylist.add(entity);
 			}
+			master.setFlume_status("RUNNING");
+			DBHelper.merge(master);
 		}
 
 		public Interceptor build() {
-			return new HydroFlumeInterceptor(context);
+			return new HydroFlumeInterceptor(context, master,entitylist);
 		}
 	}
 

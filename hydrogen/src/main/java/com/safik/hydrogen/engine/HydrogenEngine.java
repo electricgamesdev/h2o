@@ -3,6 +3,8 @@ package com.safik.hydrogen.engine;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.safik.hydrogen.db.DBHelper;
+
 public class HydrogenEngine {
 	
 	private static HydrogenEngine engine=null;
@@ -11,6 +13,14 @@ public class HydrogenEngine {
 	private HydrideConnector connector = null;
 	private HydrogenEngine(HydrideConnector connector){
 		this.connector=connector;
+	 
+	 HydrogenEngine.initialize();	
+	 ScriptRunner.initialize();
+	 DBHelper.initialize();
+	}
+	
+	public static void initialize(){
+		//TODO setup hadoop env
 	}
 	
 	public static HydrogenEngine getInstance(HydrideConnector connector){
@@ -26,7 +36,7 @@ public class HydrogenEngine {
 	
 	public void addHydrides(String name,Map hydrides,Map<String,String> pMap){
 		HydrideContext context =new HydrideContext(hydrides, connector,pMap);
-		Hydride hydride=new Hydride(context);
+		Hydride hydride=new Hydride(name,context);
 		engine.add(name,hydride);
 	}
 
@@ -37,7 +47,8 @@ public class HydrogenEngine {
 	public void startHydrides(){
 		for (String key  : hydrides.keySet()) {
 			Hydride h = hydrides.get(key);
-			h.start();
+			Thread t=new Thread(h);
+			t.start();
 		}
 	}
 

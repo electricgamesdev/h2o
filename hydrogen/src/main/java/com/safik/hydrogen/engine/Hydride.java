@@ -1,6 +1,7 @@
 package com.safik.hydrogen.engine;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -13,17 +14,65 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 import com.safik.hydrogen.ex.ScriptException;
 import com.safik.hydrogen.flume.Flume;
 import com.safik.hydrogen.oozie.Oozie;
 
-public class Hydride extends Thread {
+public final class Hydride implements Runnable {
 
-	HydrideContext context;
-
-	public Hydride(HydrideContext context) {
+	private HydrideContext context = null;
+	private String name = null;
+	
+	public String getName() {
+		return name;
+	}
+	
+	public Hydride(String name,HydrideContext context) {
 		this.context = context;
+		this.name=name;
+		String home = System.getProperty("user.home");
+		File file = new File(home+File.separator+"hydrogen");
+		FileUtils.deleteQuietly(file);
+		try {
+			FileUtils.forceMkdir(file);
+			context.setGV(GV.HOME,file);
+			Path to =new Path("/user/hydrogen/app/"+name);
+			Path dataDir =new Path("/user/hydrogen/app/"+name+"/data/valid");
+			Path errDir =new Path("/user/hydrogen/app/"+name+"/data/invalid");
+			Path scrDir =new Path("/user/hydrogen/app/"+name+"/script");
+			
+			context.setGV(GV.HDFS_HOME,to);
+			context.setGV(GV.HDFS_HOME_SCRIPT,scrDir);
+			context.setGV(GV.HDFS_HOME_DATA,dataDir);
+			context.setGV(GV.HDFS_HOME_ERROR,errDir);
+			FileSystem fileSystem = null;
+			Configuration conf = new Configuration();
+			conf.addResource(new Path(context.getValue("core-site.xml")));
+			conf.addResource(new Path(context.getValue("hdfs-site.xml")));
+			conf.addResource(new Path(context.getValue("mapred-site.xml")));
+			conf.addResource(new Path(context.getValue("yarn-site.xml")));
+
+			System.out.println("conf " + conf.toString());
+
+			fileSystem = FileSystem.get(conf);
+
+			context.setGV(GV.HDFS,fileSystem);
+			System.out.println("clean up " + to.toString());
+			if (!fileSystem.exists(to)){
+				fileSystem.mkdirs(to);
+			}else{
+				fileSystem.delete(to, true);
+				fileSystem.mkdirs(to);
+			}			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 	public HydrideContext getContext() {
@@ -52,8 +101,7 @@ public class Hydride extends Thread {
 	public void inialize() {
 		try {
 			
-			FileUtils.deleteQuietly(new File("hydrogen"));
-			FileUtils.forceMkdir(new File("hydrogen"));
+			
 			flume = ScriptFactory.getInstance(Flume.class, getContext());
 			oozie = ScriptFactory.getInstance(Oozie.class, getContext());
 
@@ -204,6 +252,11 @@ public class Hydride extends Thread {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public void run() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

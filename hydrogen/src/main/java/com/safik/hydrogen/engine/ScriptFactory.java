@@ -21,7 +21,7 @@ public class ScriptFactory {
 			throws Exception {
 
 		Script script = (Script) cls.newInstance();
-
+		script.setContext(context);
 		return new ScriptFactory(script, context);
 	}
 
