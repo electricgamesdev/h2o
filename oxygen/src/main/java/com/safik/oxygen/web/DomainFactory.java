@@ -6,14 +6,14 @@ import java.util.Map;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
 
-public class Domain extends AbsractHydridesFactory {
+public class DomainFactory extends AbsractHydridesFactory {
 
-	public Domain(URL url) throws Exception {
+	public DomainFactory(URL url) throws Exception {
 		super(url);
 	}
 	
 	protected void process(Map<String, Map> map,XMLStreamReader reader) throws Exception{
-		Map tempMap = null,wfMap=null,swMap=null;
+		Map tempMap = null,wfMap=null,swMap=null,smap=null;
 		while (reader.hasNext()) {
 			switch (reader.next()) {
 			case XMLStreamConstants.START_ELEMENT:
@@ -27,11 +27,11 @@ public class Domain extends AbsractHydridesFactory {
 				}
 				if ("source".equals(reader.getLocalName())) {
 					//tempMap = createChild(map,reader);
-					tempMap=parseAttr(swMap, reader);
+					smap=parseAttr(swMap, reader);
 					break;
 				}
 				if ("entity".equals(reader.getLocalName())) {
-					Map tempMap1 = createChild(tempMap,reader);
+					Map tempMap1 = createChild(smap,reader);
 					parseAttr(tempMap1, reader);
 					break;
 				}

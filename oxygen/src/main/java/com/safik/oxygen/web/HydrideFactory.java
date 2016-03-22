@@ -7,9 +7,9 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
 
-public class Hydride extends AbsractHydridesFactory {
+public class HydrideFactory extends AbsractHydridesFactory {
 
-	public Hydride(URL url) throws Exception {
+	public HydrideFactory(URL url) throws Exception {
 		super(url);
 	}
 	

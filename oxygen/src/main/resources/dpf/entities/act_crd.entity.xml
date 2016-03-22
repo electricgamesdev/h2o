@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<entity type="file" pattern="ord_[crd]_[act].dat" column-separator="|" header-index="0">
-	<field id="cty" type="partition" source="filename" regex="[a-z3]" nullable="false">
-		<entity path="cty_prd" field="cty" />
-	</field>
-	<field id="prd" type="partition" source="filename" regex="[a-z3]" nullable="false">
-		<entity path="cty_prd" field="prd" />
-	</field>
-	<field id="unique_id" type="partition" source="filename" regex="[0-9]" nullable="false"/>
-	<field id="repoting_period" type="partition" regex="yyyymm" order="1" nullable="false"/>
-	<field id="account_number" type="string" order="2" nullable="false"/>
-	<field id="first_name" type="string" order="2" nullable="false"/>
-	<field id="last_name" type="string" order="3" nullable="false"/>
+<entity type="file" pattern="ord_[a-z]+_[a-z]+_[a-z]+_act_[0-9]+_[0-9]+.dat" field-delimeter="|" field-has-header="true">
+	<field id="cty" type="partition" value-from-header="file.split('_')[1]" validate-pattern="[a-z]+" validate-null="true"/>
+	
+	<field id="prd" type="partition" value-from-header="file.split('_')[1]" validate-pattern="[a-z]+" validate-null="true"/>
+		
+	<field id="unique_id" type="partition" value-from-map="workflowId" validate-pattern="[a-z]+" validate-null="false"/>
+	<field id="repoting_period"  value-from-header="file.split('_')[5].substring(0,6)" validate-pattern="[a-z+]" validate-null="false"/>
+	<field id="filename" type="string" validate-pattern="[a-z3]" validate-null="false"/>
+	<field id="count" type="long" validate-pattern="[a-z3]" validate-null="false"/>
+	<field id="checksum" type="long" validate-pattern="[a-z3]" validate-null="false"/>
 </entity>

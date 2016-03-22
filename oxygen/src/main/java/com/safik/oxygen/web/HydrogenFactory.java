@@ -17,28 +17,28 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-public class HydridesFactory {
+public class HydrogenFactory {
 
 	private Class comp;
 	private AbsractHydridesFactory data;
-	private static Map<String, HydridesFactory> map = new HashMap<String, HydridesFactory>();
+	private static Map<String, HydrogenFactory> map = new HashMap<String, HydrogenFactory>();
 	private static URL urlHydride = null;
 
-	private HydridesFactory(Class comp, URL stream) throws Exception {
+	private HydrogenFactory(Class comp, URL stream) throws Exception {
 		this.comp = comp;
 		Constructor<?> ctor = comp.getConstructor(URL.class);
 		Object object = ctor.newInstance(new Object[] { stream });
 		this.data = (AbsractHydridesFactory) object;
 	}
 
-	public static HydridesFactory getInstance(Class cls) throws Exception {
+	public static HydrogenFactory getInstance(Class cls) throws Exception {
 
 		return getInstance(cls, null);
 	}
 
-	public static HydridesFactory getInstance(Class cls, URL url) throws Exception {
+	public static HydrogenFactory getInstance(Class cls, URL url) throws Exception {
 		if (url != null) {
-			map.put(cls.getSimpleName().toLowerCase(), new HydridesFactory(cls, url));
+			map.put(cls.getSimpleName().toLowerCase(), new HydrogenFactory(cls, url));
 		}
 		return map.get(cls.getSimpleName().toLowerCase());
 	}

@@ -6,9 +6,9 @@ import java.util.Map;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
 
-public class Layout extends AbsractHydridesFactory {
+public class LayoutFactory extends AbsractHydridesFactory {
 
-	public Layout(URL url) throws Exception {
+	public LayoutFactory(URL url) throws Exception {
 		super(url);
 	}
 	

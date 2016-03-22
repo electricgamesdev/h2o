@@ -48,7 +48,7 @@ public class HydridesServlet extends HttpServlet implements HydrideConnector {
 				pMap.put("yarn-site.xml", getServletConfig().getServletContext().getRealPath("WEB-INF/yarn-site.xml").toString());
 
 				// stage 1 : Loading hydrides
-				Map<String, Map> hydrides = HydridesFactory.getInstance(Hydride.class, url).getData();
+				Map<String, Map> hydrides = HydrogenFactory.getInstance(HydrideFactory.class, url).getData();
 
 				hydrogenEngine.addHydrides("test", hydrides, pMap);
 				hydrogenEngine.initHydrides();
@@ -125,17 +125,17 @@ public class HydridesServlet extends HttpServlet implements HydrideConnector {
 	public Map getData(URL url) throws Exception {
 		Map<String, Map> map = null;
 		if (url.toString().endsWith(".domain.xml")) {
-			map = HydridesFactory.getInstance(Domain.class, url).getData();
+			map = HydrogenFactory.getInstance(DomainFactory.class, url).getData();
 		} else if (url.toString().endsWith(".layout.xml")) {
-			map = HydridesFactory.getInstance(Layout.class, url).getData();
+			map = HydrogenFactory.getInstance(LayoutFactory.class, url).getData();
 		} else if (url.toString().endsWith(".entity.xml")) {
-			map = HydridesFactory.getInstance(Entity.class, url).getData();
+			map = HydrogenFactory.getInstance(EntityFactory.class, url).getData();
 			System.out.println(printKeyValue("entity", map));
 		} else if (url.toString().endsWith(".form.xml")) {
-			map = HydridesFactory.getInstance(Form.class, url).getData();
+			map = HydrogenFactory.getInstance(FormFoctory.class, url).getData();
 			System.out.println(printKeyValue("form", map));
 		} else if (url.toString().endsWith(".action.xml")) {
-			map = HydridesFactory.getInstance(Action.class, url).getData();
+			map = HydrogenFactory.getInstance(ActionFactory.class, url).getData();
 			System.out.println(printKeyValue("action", map));
 		}
 

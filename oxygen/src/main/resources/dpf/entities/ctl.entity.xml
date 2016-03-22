@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- ord_in_crd_gcb_all_20150331_201312031234.ctl -->
-<entity type="file" pattern="ord_[a-z]2_[a-z]3_[a-z]5-\d[0-9]8-\d[0-9]10.ctl" separator="|" header="true">
-	<field id="cty" type="partition" get-value="file.split('_')[1]" check-pattern="[a-z3]" check-null="false">
-		<entity path="cty_prd" field="cty" />
-	</field>
-	<field id="prd" type="partition" get-value="file.split('_')[1]" check-pattern="[a-z3]" check-null="false">
-		<entity path="cty_prd" field="prd" />
-	</field>
-	<field id="unique_id" type="partition" get-value="workflowId" check-pattern="[a-z3]" check-null="false"/>
-	<field id="repoting_period"  get-value="file.split('_')[5].substring(0,6)" check-pattern="[a-z3]" check-null="false"/>
-	<field id="filename" type="string" check-pattern="[a-z3]" check-null="false"/>
-	<field id="count" type="long" check-pattern="[a-z3]" check-null="false"/>
-	<field id="checksum" type="long" check-pattern="[a-z3]" check-null="false"/>
+<entity type="file" pattern="ord_[a-z]+_[a-z]+_[a-z]+_all_[0-9]+_[0-9]+.ctl" field-delimeter="|" field-has-header="true">
+	<field id="cty" type="partition" value-from-header="file.split('_')[1]" validate-pattern="[a-z]+" validate-null="true"/>
+	<field id="prd" type="partition" value-from-header="file.split('_')[1]" validate-pattern="[a-z]+" validate-null="true"/>
+<!-- 		<entity path="cty_prd" field="prd" /> -->
+<!-- 	</field> -->
+	<field id="unique_id" type="partition" value-from-map="workflowId" validate-pattern="[a-z]+" validate-null="false"/>
+	<field id="repoting_period"  value-from-header="file.split('_')[5].substring(0,6)" validate-pattern="[a-z+]" validate-null="false"/>
+	<field id="name" type="string" validate-pattern="[a-z]+" validate-null="false"/>
+	<field id="accountno" type="long" validate-pattern="[0-9]+" validate-null="false"/>
+	<field id="amount" type="double" validate-pattern="[0-9]+" validate-null="false"/>
 </entity>
