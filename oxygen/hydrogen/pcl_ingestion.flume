@@ -1,0 +1,62 @@
+pcl_ingestion.sources  = source1
+pcl_ingestion.channels = channel1 channel3
+pcl_ingestion.sinks    = sink1 sink3
+
+pcl_ingestion.channels.channel1.type   = file
+pcl_ingestion.channels.channel1.transactionCapacity = 100
+pcl_ingestion.channels.channel1.dataDirs   = /opt/hydrogen/source/pcl_ingestion_data1
+pcl_ingestion.channels.channel1.checkpointDir= checkpoint1
+
+pcl_ingestion.channels.channel3.type   = file
+pcl_ingestion.channels.channel3.transactionCapacity = 100
+pcl_ingestion.channels.channel3.dataDirs   = /opt/hydrogen/source/pcl_ingestion_data1
+pcl_ingestion.channels.channel3.checkpointDir= checkpoint2
+
+pcl_ingestion.sources.source1.channels = channel1 channel3
+pcl_ingestion.sources.source1.type     = spooldir
+pcl_ingestion.sources.source1.spoolDir = /opt/hydrogen/source/pcl_data
+pcl_ingestion.sources.source1.deletePolicy = immediate
+pcl_ingestion.sources.source1.fileHeader = true
+pcl_ingestion.sources.source1.basenameHeader=true
+pcl_ingestion.sources.source1.fileHeaderKey=file
+pcl_ingestion.sources.source1.basenameHeaderKey=basename
+pcl_ingestion.sources.source1.interceptors = i1 i2
+
+pcl_ingestion.sources.source1.interceptors.i1.type = org.apache.flume.interceptor.TimestampInterceptor$Builder
+pcl_ingestion.sources.source1.interceptors.i2.type = com.safik.hydrogen.flume.HydroFlumeInterceptor$Builder
+pcl_ingestion.sources.source1.interceptors.i2.source = pcl_ingestion
+pcl_ingestion.sources.source1.interceptors.i2.filter = name.substring(file.lastIndexOf('_'),file.lastIndexOf('.'))
+
+pcl_ingestion.sources.source1.selector.type = multiplexing
+pcl_ingestion.sources.source1.selector.header = entity
+pcl_ingestion.sources.source1.selector.mapping.ctl = channel1
+pcl_ingestion.sources.source1.selector.mapping.dat = channel1
+pcl_ingestion.sources.source1.selector.default = channel3
+
+pcl_ingestion.sinks.sink1.channel      = channel1
+pcl_ingestion.sinks.sink1.type         = hdfs
+pcl_ingestion.sinks.sink1.hdfs.writeFormat = Text
+#pcl_ingestion.sinks.sink1.hdfs.fileType = SequenceFile
+pcl_ingestion.sinks.sink1.hdfs.path =/user/hydrogen/processed
+pcl_ingestion.sinks.sink1.hdfs.filePrefix = %{basename}
+pcl_ingestion.sinks.sink1.hdfs.fileSuffix = .processing
+pcl_ingestion.sinks.sink1.hdfs.batchSize = 10
+pcl_ingestion.sinks.sink1.hdfs.rollCount = 0
+pcl_ingestion.sinks.sink1.hdfs.rollInterval = 0
+#pcl_ingestion.sinks.sink1.hdfs.rollSize = 0
+
+pcl_ingestion.sinks.sink3.channel      = channel3
+pcl_ingestion.sinks.sink3.type         = hdfs
+pcl_ingestion.sinks.sink3.hdfs.writeFormat = Text
+#pcl_ingestion.sinks.sink3.hdfs.fileType = SequenceFile
+pcl_ingestion.sinks.sink3.hdfs.path =/user/hydrogen/error
+pcl_ingestion.sinks.sink3.hdfs.filePrefix = %{basename}
+pcl_ingestion.sinks.sink3.hdfs.fileSuffix = .invalid
+pcl_ingestion.sinks.sink3.hdfs.batchSize = 10
+pcl_ingestion.sinks.sink3.hdfs.rollCount = 0
+pcl_ingestion.sinks.sink3.hdfs.rollInterval = 0
+#pcl_ingestion.sinks.sink3.hdfs.rollSize = 0
+pcl_ingestion.sources.source1.selector.mapping.ctl = channel1 
+pcl_ingestion.sources.source1.selector.mapping.act_crd = channel1 
+pcl_ingestion.sources.source1.interceptors.i2.entities = ctl,act_crd, 
+pcl_ingestion.sources.source1.interceptors.i2.patterns = ord_[a-z]2_[a-z]3_[a-z]5-\d[0-9]8-\d[0-9]10.ctl,ord_[crd]_[act].dat, 

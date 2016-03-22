@@ -1,0 +1,33 @@
+<coordinator-app name="card_ingestion_coordinator" frequency="${frequency}"
+	start="${startTime}" end="${endTime}" timezone="UTC"
+	xmlns="uri:oozie:coordinator:0.1">
+	<datasets>
+	<dataset name="ctl" frequency="${datasetfrequency}"
+	initial-instance="${datasetinitialinstance}" timezone="${datasettimezone}">
+	<uri-template>${dataseturitemplate}</uri-template>
+	<done-flag>${ctl}</done-flag>
+</dataset>
+	<dataset name="act_crd" frequency="${datasetfrequency}"
+	initial-instance="${datasetinitialinstance}" timezone="${datasettimezone}">
+	<uri-template>${dataseturitemplate}</uri-template>
+	<done-flag>${act_crd}</done-flag>
+</dataset>
+	
+	</datasets>
+	<input-events>
+	<data-in name="ctlIN" dataset="ctl">
+	<start-instance>${inputeventstartinstance}</start-instance>
+	<end-instance>${inputeventendinstance}</end-instance>
+</data-in>
+	<data-in name="act_crdIN" dataset="act_crd">
+	<start-instance>${inputeventstartinstance}</start-instance>
+	<end-instance>${inputeventendinstance}</end-instance>
+</data-in>
+	
+	</input-events>
+	<action>
+		<workflow>
+			<app-path>${workflowPath}</app-path>
+		</workflow>
+	</action>
+</coordinator-app>		

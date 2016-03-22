@@ -1,0 +1,19 @@
+<workflow-app xmlns="uri:oozie:workflow:0.2" name="pcl_ingestion_workflow">
+	<start to="pcl_ingestion_move" />
+	<action name="pcl_ingestion_move">
+         <fs>
+             <mkdir path="${nameNode}/user/hydrogen/target/${wf:id()}"/>
+           <data-in name="act_crdIN" dataset="#2">
+	<start-instance>${inputeventstartinstance}</start-instance>
+	<end-instance>${inputeventendinstance}</end-instance>
+</data-in>
+	
+        </fs>
+        <ok to="end"/>
+        <error to="fail"/>
+    </action>
+    <kill name="fail">
+		<message>File move failed, error message[${wf:errorMessage(wf:lastErrorNode())}]</message>
+	</kill>
+	<end name="end" />
+</workflow-app>

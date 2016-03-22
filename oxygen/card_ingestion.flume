@@ -1,0 +1,62 @@
+card_ingestion.sources  = source1
+card_ingestion.channels = channel1 channel3
+card_ingestion.sinks    = sink1 sink3
+
+card_ingestion.channels.channel1.type   = file
+card_ingestion.channels.channel1.transactionCapacity = 100
+card_ingestion.channels.channel1.dataDirs   = /opt/hydrogen/source/data1
+card_ingestion.channels.channel1.checkpointDir=/opt/hydrogen/source/checkpoint1
+
+card_ingestion.channels.channel3.type   = file
+card_ingestion.channels.channel3.transactionCapacity = 100
+card_ingestion.channels.channel3.dataDirs   = /opt/hydrogen/source/data2
+card_ingestion.channels.channel3.checkpointDir=/opt/hydrogen/source/checkpoint2
+
+card_ingestion.sources.source1.channels = channel1 channel3
+card_ingestion.sources.source1.type     = spooldir
+card_ingestion.sources.source1.spoolDir = /opt/hydrogen/source
+card_ingestion.sources.source1.deletePolicy = immediate
+card_ingestion.sources.source1.fileHeader = true
+card_ingestion.sources.source1.basenameHeader=true
+card_ingestion.sources.source1.fileHeaderKey=file
+card_ingestion.sources.source1.basenameHeaderKey=basename
+card_ingestion.sources.source1.interceptors = i1 i2
+
+card_ingestion.sources.source1.interceptors.i1.type = org.apache.flume.interceptor.TimestampInterceptor$Builder
+card_ingestion.sources.source1.interceptors.i2.type = com.safik.hydrogen.flume.HydroFlumeInterceptor$Builder
+card_ingestion.sources.source1.interceptors.i2.source = card_ingestion
+card_ingestion.sources.source1.interceptors.i2.filter = name.substring(file.lastIndexOf('_'),file.lastIndexOf('.'))
+
+card_ingestion.sources.source1.selector.type = multiplexing
+card_ingestion.sources.source1.selector.header = entity
+card_ingestion.sources.source1.selector.mapping.ctl = channel1
+card_ingestion.sources.source1.selector.mapping.dat = channel1
+card_ingestion.sources.source1.selector.default = channel3
+
+card_ingestion.sinks.sink1.channel      = channel1
+card_ingestion.sinks.sink1.type         = hdfs
+card_ingestion.sinks.sink1.hdfs.writeFormat = Text
+card_ingestion.sinks.sink1.hdfs.fileType = SequenceFile
+card_ingestion.sinks.sink1.hdfs.path =/user/hydrogen/processed
+card_ingestion.sinks.sink1.hdfs.filePrefix = %{basename}
+card_ingestion.sinks.sink1.hdfs.fileSuffix = .processing
+card_ingestion.sinks.sink1.hdfs.batchSize = 10
+card_ingestion.sinks.sink1.hdfs.rollCount = 0
+card_ingestion.sinks.sink1.hdfs.rollInterval = 0
+#card_ingestion.sinks.sink1.hdfs.rollSize = 0
+
+card_ingestion.sinks.sink3.channel      = channel3
+card_ingestion.sinks.sink3.type         = hdfs
+card_ingestion.sinks.sink3.hdfs.writeFormat = Text
+card_ingestion.sinks.sink3.hdfs.fileType = SequenceFile
+card_ingestion.sinks.sink3.hdfs.path =/user/hydrogen/error
+card_ingestion.sinks.sink3.hdfs.filePrefix = %{basename}
+card_ingestion.sinks.sink3.hdfs.fileSuffix = .invalid
+card_ingestion.sinks.sink3.hdfs.batchSize = 10
+card_ingestion.sinks.sink3.hdfs.rollCount = 0
+card_ingestion.sinks.sink3.hdfs.rollInterval = 0
+#card_ingestion.sinks.sink3.hdfs.rollSize = 0
+card_ingestion.sources.source1.selector.mapping.ctl = channel1 
+card_ingestion.sources.source1.selector.mapping.act_crd = channel1 
+card_ingestion.sources.source1.interceptors.i2.entities = ctl,act_crd, 
+card_ingestion.sources.source1.interceptors.i2.patterns = ord_[a-z]2_[a-z]3_[a-z]5-\d[0-9]8-\d[0-9]10.ctl,ord_[crd]_[act].dat, 
